@@ -3,57 +3,35 @@ name: Build College Hub APK
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: ☕ Setup Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
-
-      - name: 🐦 Setup Flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.3'
-          channel: 'stable'
-          cache: true
+          flutter-version: "3.27.1"
+          channel: "stable"
 
-      - name: 📊 Flutter Doctor
-        run: flutter doctor -v
+      - name: Flutter doctor
+        run: flutter doctor
 
-      - name: 🔧 Disable Flutter Analytics
-        run: flutter config --no-analytics
-
-      - name: 🧹 Clean Flutter
+      - name: Clean project
         run: flutter clean
 
-      - name: 📦 Get Dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: 🔨 Build APK (Release)
-        run: flutter build apk --release --verbose
+      - name: Build Release APK
+        run: flutter build apk --release
 
-      - name: 📤 Upload APK Artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CollegeHub-Release-APK-${{ github.run_number }}
+          name: CollegeHub-Release-APK
           path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
-
-      - name: 📋 APK Build Info
-        run: |
-          echo "✅ APK Build Successful!"
-          echo "📦 APK Location: build/app/outputs/flutter-apk/app-release.apk"
-          ls -lh build/app/outputs/flutter-apk/
