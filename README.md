@@ -1,16 +1,25 @@
-# collegehub
+# College Hub App
 
-A new Flutter project.
+College Hub is a unified campus mobile application built using Flutter that provides students with notices, events, placements, results, clubs, and communication in one platform.
 
-## Getting Started
+## Features
+- Student Notices
+- Event Updates
+- Placement Information
+- Exam Results
+- Clubs & Activities
+- Campus Communication
 
-This project is a starting point for a Flutter application.
+## Tech Stack
+- Flutter (Dart)
+- Firebase
+- GitHub Actions (CI/CD)
 
-A few resources to get you started if this is your first Flutter project:
+## Security
+- MIT License
+- GitHub CodeQL Security Scan
+- Secure Release Builds
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Author
+Mahendar Reddy  
+VJIT College – AIML Department
