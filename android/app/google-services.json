@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "547795158340",
+    "project_id": "collegehub-711d5",
+    "storage_bucket": "collegehub-711d5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547795158340:android:0e2452ff915778fd6d8311",
+        "android_client_info": {
+          "package_name": "com.example.collegehub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "547795158340-5cntrsu349bbqebgm2uehscds56ophu4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-QzzdJQIUGP38xmCg_PhK3D7_aM_lNSo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "547795158340-5cntrsu349bbqebgm2uehscds56ophu4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
