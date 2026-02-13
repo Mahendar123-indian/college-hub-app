@@ -1,12 +1,15 @@
-name: Build College Hub APK
+name: Build and Release College Hub APK
 
 on:
   push:
-    branches: [ "main" ]
+    tags:
+      - 'v*' # This triggers the release when you push a tag like v1.0.1
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Crucial: gives the action permission to create a release
 
     steps:
       - uses: actions/checkout@v4
@@ -16,17 +19,17 @@ jobs:
         with:
           flutter-version: "3.22.0"
 
-      - name: Clean
-        run: flutter clean
-
-      - name: Get dependencies
-        run: flutter pub get
-
       - name: Build APK
-        run: flutter build apk --release
+        # Standard command you used before, adding split-per-abi for better compatibility
+        run: flutter build apk --release --split-per-abi
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: CollegeHub-Release-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          files: build/app/outputs/flutter-apk/*.apk # Uploads all generated APKs
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Built-in token, no setup needed
