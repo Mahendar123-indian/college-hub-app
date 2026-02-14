@@ -99,7 +99,7 @@ dependencies:
   fl_chart: ^0.65.0
 
   # Audio Recording
-  record: ^5.1.2
+  record: ^5.0.5
 
   # Others
   rxdart: ^0.27.7
