@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_math_fork/flutter_math.dart';
 
-/// 🎯 ADVANCED LATEX MATH RENDERER
-/// Supports inline ($...$) and block ($$...$$) math expressions
+/// 🎯 SIMPLE LATEX/MATH RENDERER (Without flutter_math_fork)
+/// Displays math expressions with proper formatting
 class LatexRenderer extends StatelessWidget {
   final String content;
   final TextStyle? textStyle;
@@ -17,76 +16,60 @@ class LatexRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildMixedContent();
+    return _buildContent();
   }
 
-  Widget _buildMixedContent() {
-    final parts = _parseLatexContent(content);
+  Widget _buildContent() {
+    // Check for block math ($$...$$)
+    if (content.contains(r'$$')) {
+      return _buildBlockMath(content);
+    }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: parts.map((part) {
-        if (part['type'] == 'latex_block') {
-          return _buildBlockMath(part['content']!);
-        } else if (part['type'] == 'text_with_inline') {
-          // This contains mixed text and inline math
-          return _buildTextWithInlineMath(part['content']!);
-        } else if (part['type'] == 'text') {
-          return _buildText(part['content']!);
-        } else {
-          return const SizedBox.shrink();
-        }
-      }).toList(),
-    );
+    // Check for inline math ($...$)
+    if (content.contains(r'$')) {
+      return _buildInlineMath(content);
+    }
+
+    // Plain text
+    return _buildText(content);
   }
 
-  /// Parse content to extract LaTeX expressions
-  List<Map<String, String>> _parseLatexContent(String text) {
-    final parts = <Map<String, String>>[];
+  Widget _buildBlockMath(String text) {
+    final parts = <Widget>[];
     final blockRegex = RegExp(r'\$\$(.*?)\$\$', dotAll: true);
-
     int lastEnd = 0;
 
-    // First, find all block math ($$...$$)
-    final blockMatches = blockRegex.allMatches(text).toList();
-
-    for (final match in blockMatches) {
-      // Add text before this match (may contain inline math)
+    for (final match in blockRegex.allMatches(text)) {
+      // Add text before math
       if (match.start > lastEnd) {
         final textBefore = text.substring(lastEnd, match.start);
         if (textBefore.trim().isNotEmpty) {
-          parts.add({
-            'type': 'text_with_inline',
-            'content': textBefore,
-          });
+          parts.add(_buildText(textBefore));
         }
       }
 
       // Add block math
-      parts.add({
-        'type': 'latex_block',
-        'content': match.group(1)!.trim(),
-      });
+      final mathContent = match.group(1)?.trim() ?? '';
+      parts.add(_buildMathBlock(mathContent));
 
       lastEnd = match.end;
     }
 
-    // Add remaining text (may contain inline math)
+    // Add remaining text
     if (lastEnd < text.length) {
       final remaining = text.substring(lastEnd);
       if (remaining.trim().isNotEmpty) {
-        parts.add({
-          'type': 'text_with_inline',
-          'content': remaining,
-        });
+        parts.add(_buildText(remaining));
       }
     }
 
-    return parts;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: parts,
+    );
   }
 
-  /// Build text that may contain inline math
-  Widget _buildTextWithInlineMath(String text) {
+  Widget _buildInlineMath(String text) {
     final inlineRegex = RegExp(r'\$(.*?)\$');
     final matches = inlineRegex.allMatches(text).toList();
 
@@ -98,27 +81,32 @@ class LatexRenderer extends StatelessWidget {
     int lastEnd = 0;
 
     for (final match in matches) {
-      // Add text before this match
+      // Add text before match
       if (match.start > lastEnd) {
         final textBefore = text.substring(lastEnd, match.start);
         if (textBefore.isNotEmpty) {
-          spans.add(TextSpan(
-            text: textBefore,
-            style: textStyle ?? const TextStyle(fontSize: 15, height: 1.5),
-          ));
+          spans.add(TextSpan(text: textBefore));
         }
       }
 
       // Add inline math
-      final latex = match.group(1)?.trim() ?? '';
+      final mathContent = match.group(1)?.trim() ?? '';
       spans.add(WidgetSpan(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
             color: const Color(0xFF6366F1).withOpacity(0.1),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: _buildMathWidget(latex, isBlock: false),
+          child: Text(
+            mathContent,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'monospace',
+              color: isDarkMode ? Colors.white : const Color(0xFF6366F1),
+            ),
+          ),
         ),
         alignment: PlaceholderAlignment.middle,
       ));
@@ -130,30 +118,23 @@ class LatexRenderer extends StatelessWidget {
     if (lastEnd < text.length) {
       final remaining = text.substring(lastEnd);
       if (remaining.isNotEmpty) {
-        spans.add(TextSpan(
-          text: remaining,
-          style: textStyle ?? const TextStyle(fontSize: 15, height: 1.5),
-        ));
+        spans.add(TextSpan(text: remaining));
       }
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: RichText(
-        text: TextSpan(
-          children: spans,
-          style: textStyle ?? const TextStyle(
-            fontSize: 15,
-            height: 1.5,
-            color: Colors.black87,
-          ),
+    return RichText(
+      text: TextSpan(
+        children: spans,
+        style: textStyle ?? TextStyle(
+          fontSize: 15,
+          height: 1.5,
+          color: isDarkMode ? Colors.white : Colors.black87,
         ),
       ),
     );
   }
 
-  /// Build block math (centered, larger)
-  Widget _buildBlockMath(String latex) {
+  Widget _buildMathBlock(String mathContent) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 16),
@@ -178,70 +159,30 @@ class LatexRenderer extends StatelessWidget {
           ),
         ],
       ),
-      child: Center(
-        child: _buildMathWidget(latex, isBlock: true),
+      child: SelectableText(
+        mathContent,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'monospace',
+          color: isDarkMode ? Colors.white : const Color(0xFF6366F1),
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
 
-  /// Build actual Math widget
-  Widget _buildMathWidget(String latex, {required bool isBlock}) {
-    try {
-      return Math.tex(
-        latex,
-        textStyle: TextStyle(
-          fontSize: isBlock ? 20 : 16,
-          color: isDarkMode ? Colors.white : Colors.black87,
-        ),
-        mathStyle: isBlock ? MathStyle.display : MathStyle.text,
-        onErrorFallback: (err) {
-          return Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red.withOpacity(0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline, color: Colors.red, size: 16),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    'LaTeX Error: $latex',
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 12,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      return Text(
-        'Error rendering: $latex',
-        style: const TextStyle(color: Colors.red, fontSize: 12),
-      );
-    }
-  }
-
-  /// Build plain text
   Widget _buildText(String text) {
     if (text.trim().isEmpty) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        text,
-        style: textStyle ?? const TextStyle(
+      child: SelectableText(
+        text.trim(),
+        style: textStyle ?? TextStyle(
           fontSize: 15,
           height: 1.5,
-          color: Colors.black87,
+          color: isDarkMode ? Colors.white : Colors.black87,
         ),
       ),
     );
@@ -329,10 +270,15 @@ class MathEquationCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(20),
             child: Center(
-              child: Math.tex(
+              child: SelectableText(
                 equation,
-                textStyle: const TextStyle(fontSize: 22),
-                mathStyle: MathStyle.display,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'monospace',
+                  color: color,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
