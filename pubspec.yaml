@@ -88,7 +88,7 @@ dependencies:
   fluttertoast: ^8.2.4
   uuid: ^4.2.2
   flutter_markdown: ^0.6.17
-  flutter_math_fork: ^0.7.4
+  flutter_math_fork: ^0.7.3
   flutter_highlight: ^0.7.0
   highlight: ^0.7.0
   flutter_animate: ^4.3.0
@@ -151,3 +151,7 @@ flutter_launcher_icons:
 
 dependency_overrides:
   record_linux: ^1.1.1
+  flutter_math_fork:
+    git:
+      url: https://github.com/simpleclub/flutter_math.git
+      ref: "6e84b607c5c0e00dd1f3d4bd30ef3f1628053328"
